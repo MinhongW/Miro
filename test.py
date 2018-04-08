@@ -15,7 +15,7 @@ from miro_msgs.msg import platform_config,platform_sensors,platform_state,platfo
 def publish():
     global Control
     #sensorSub = rospy.Subscriber('miro/rob01/platform/sensors',platform_sensors,test_callback)
-    pub = rospy.Publisher('miro/rob01/platform/control', platform_control, queue_size=0)
+    pub = rospy.Publisher('miro/sim01/platform/control', platform_control, queue_size=0)
     while True:
         pub.publish(Control)
         time.sleep(0.05)
@@ -34,13 +34,13 @@ def getKey():
 	return key
 
 def spin():
-    print "spinning\n"
+    #print "spinning\n"
     Control.body_vel.angular.z = Control.body_vel.angular.z + 1
     time.sleep(3)
     Control.body_vel.angular.z = 0
     
 def nod():
-    print "nodding\n"
+    #print "nodding\n"
     Control.body_config[1] =  - 1.0
     time.sleep(3)
     Control.body_config[1] =  1.0
@@ -50,7 +50,7 @@ def nod():
 
 
 def shake():
-    print "shaking\n"
+    #print "shaking\n"
     Control.body_config[2] = - 1.0
     time.sleep(3)
     Control.body_config[2] =   1.0
@@ -59,20 +59,20 @@ def shake():
     time.sleep(3)
     
 def wag():
-    print "wagging\n"
+    #print "wagging\n"
     Control.tail = 1.0
     time.sleep(3)
     Control.tail = 0.0
     
 
 def blink():
-    print "blinking\n"
+    #print "blinking\n"
     Control.blink_time = 2
     time.sleep(0.2)
     Control.blink_time = 0
 
 def woof():
-    print "woofing\n"
+    #print "woofing\n"
     Control.sound_index_P2 = 2
     time.sleep(1)
     Control.sound_index_P2 = 24
@@ -82,22 +82,17 @@ def printControlStatus():
 
 if __name__=="__main__":
     
-
     global Control
     Control = platform_control()
     rospy.init_node('teleop_twist_keyboard')
     settings = termios.tcgetattr(sys.stdin)
-    #List of the moves he can do:
-    #spins around - left arrow 
-    #blinks - spacebar
-    #nod - n
-    #shake head - s
-    #wag tail -
+
     Control.body_config_speed = [-1.0, -1.0, -1.0, -1.0]
     quitGame = False
     playing = False
     availableMoves = [spin,blink,nod,shake,wag]
     moves = []
+    print "Welcome to Miro's Memory Game"
     thread.start_new_thread(publish, ())
     while(quitGame == False):
         if (playing==False):
@@ -112,7 +107,8 @@ if __name__=="__main__":
         else:
             for move in moves:
                 print "Enter the next move in the sequence!\n"
-                print move.func_name
+                print "S to spin around, Y to nod head, N to shake head,\n W to Wag tail,B to blink"
+                #print move.func_name
                 key = getKey()
                 if key == 'q': 
                     quitGame=True
@@ -123,53 +119,44 @@ if __name__=="__main__":
                         spin()
                     else:
                         print "YOU WERE WRONG"
+                        quitGame=True
+                        break
                 
-                elif key == "n":
+                elif key == "y":
                     if move == nod:
                         nod()
                     else:
                         print "YOU WERE WRONG"
+                        quitGame=True
+                        break
                 
-                elif key == "b": 
+                elif key == "n": 
                     if move == shake:
                         shake()
                     else:
                         print "YOU WERE WRONG"
+                        quitGame=True
+                        break
                 elif key == "w":
                     if move == wag:
                         wag()
                     else:
                         print "YOU WERE WRONG"
+                        quitGame=True
+                        break
                 
-                elif key == " ":
+                elif key == "b":
                     if move == blink: 
                         blink()
                     else:
                         break
             playing = False
 
-       
-
-    # moves = []
-
-    # playing = False
-    # gameOver = False
-    # while(!gameOver):
-    #     if (!playing){
-    #         #play the whole list so far
-    #         #pick a random move from available moves
-    #         #play it
-    #         #and add it to the moves list
-    #         #set playing to true
-    #         }
-    #     else {
-              #currentMove = move[i]
-    #         #for each move in the move list
-    #         #   listen for input
-    #         #   if the input matches current move
-    #         #   contnue on, otherwise FAIL! -> sad :( gameOver = true 
-    #         #set playing to false
-    #         }
-
-
-
+    
+    # Memory Game
+    # List of the moves he can do:
+    #spins around - left arrow 
+    #blinks - spacebar
+    #nod - n
+    #shake head - s
+    #wag tail -
